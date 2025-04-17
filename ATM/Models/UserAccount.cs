@@ -8,6 +8,7 @@ namespace ATM
         internal string AccountNumber { get; set; }
         internal string PinNumber { get; set; }
         internal double Balance { get; set; }
+        internal string FullName { get; set; }
         internal List<UserTransaction> Transactions { get; set; }
 
         internal UserAccount()

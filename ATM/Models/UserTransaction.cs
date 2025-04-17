@@ -8,7 +8,7 @@ namespace ATM.Models
 {
     internal class UserTransaction
     {
-        internal string TransactionType { get; set; }
+        internal TransactionType TransactionType { get; set; }
         internal DateTime TimeStamp { get; set; }
         internal double Amount { get; set; }
 

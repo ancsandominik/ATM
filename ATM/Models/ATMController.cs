@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ATM.Models;
 
 namespace ATM
@@ -6,15 +8,32 @@ namespace ATM
     internal class ATMController
     {
         private UserAccount _activeAccount = null;
+        private List<UserAccount> _accounts = null;
 
         internal ATMController()
         {
-            _activeAccount = new UserAccount
+            _accounts = new List<UserAccount>();
+
+            _accounts.Add(new UserAccount
             {
                 AccountNumber = "1234",
                 PinNumber = "9999",
-                Balance = 161.23
-            };
+                Balance = 241.95
+            });
+
+            _accounts.Add(new UserAccount
+            {
+                AccountNumber = "2345",
+                PinNumber = "9999",
+                Balance = 42.91
+            });
+
+            _accounts.Add(new UserAccount
+            {
+                AccountNumber = "3456",
+                PinNumber = "9999",
+                Balance = 124.66
+            });
         }
 
         public void DisplayLoginScreen()
@@ -27,8 +46,11 @@ namespace ATM
             Console.WriteLine(pinNumberPrompt);
             string pinNumber = Console.ReadLine();
 
-            if (accountNumber == _activeAccount.AccountNumber && pinNumber == _activeAccount.PinNumber)
+            UserAccount account = _accounts.SingleOrDefault(x => x.AccountNumber == accountNumber && x.PinNumber == pinNumber);
+
+            if (account != null)
             {
+                _activeAccount = account;
                 DisplayMainMenuScreen();
             }
             else
@@ -76,6 +98,7 @@ namespace ATM
                 default:
                     Console.WriteLine("Invalid selection. Press any key to continue.");
                     Console.ReadKey();
+                    DisplayMainMenuScreen();
                     break;
             }
         }
@@ -86,7 +109,7 @@ namespace ATM
             Console.WriteLine("Account Ballance");
 
             Console.WriteLine();
-            Console.WriteLine($"Current account balance: ${_activeAccount.Balance}");
+            Console.WriteLine($"Current account balance: {GetCurrencyForDisplay(_activeAccount.Balance)}");
 
             Console.ReadKey();
             DisplayMainMenuScreen();
@@ -107,13 +130,13 @@ namespace ATM
             {
                 _activeAccount.Balance = _activeAccount.Balance + amount;
                 Console.WriteLine();
-                Console.WriteLine($"Deposit amount ${amount} accepted. Press any key to continue.");
+                Console.WriteLine($"Deposit amount {GetCurrencyForDisplay(amount)} accepted. Press any key to continue.");
                 
                 _activeAccount.Transactions.Add(new UserTransaction
                 {
                     Amount = amount,
                     TimeStamp = DateTime.Now,
-                    TransactionType = "Deposit"
+                    TransactionType = TransactionType.Deposit
                 });
 
                 Console.ReadKey();
@@ -141,13 +164,13 @@ namespace ATM
                 {
                     _activeAccount.Balance = _activeAccount.Balance - amount;
                     Console.WriteLine();
-                    Console.WriteLine($"Withdraw amount ${amount} accepted. Press any key to continue.");
+                    Console.WriteLine($"Withdraw amount {GetCurrencyForDisplay(amount)} accepted. Press any key to continue.");
 
                     _activeAccount.Transactions.Add(new UserTransaction
                     {
                         Amount = amount,
                         TimeStamp = DateTime.Now,
-                        TransactionType = "Withdraw"
+                        TransactionType = TransactionType.Withdraw
                     });
 
                     Console.ReadKey();
@@ -181,7 +204,7 @@ namespace ATM
             Console.WriteLine();
             foreach (UserTransaction transaction in _activeAccount.Transactions)
             {
-                Console.WriteLine($"Date: {transaction.TimeStamp.ToShortDateString()} | Amount: ${transaction.Amount} | TransactionType: {transaction.TransactionType}");
+                Console.WriteLine($"Date: {transaction.TimeStamp/*.ToShortDateString()*/} Amount: {GetCurrencyForDisplay(transaction.Amount)} TransactionType: {transaction.TransactionType}");
             }
 
             Console.WriteLine();
@@ -193,8 +216,16 @@ namespace ATM
 
         private void Logout()
         {
+            _activeAccount = null;
             Console.Clear();
             DisplayLoginScreen();
+        }
+
+        private string GetCurrencyForDisplay(double value)
+        {
+            string formattedValue = string.Format("{0:C}", value);
+
+            return formattedValue;
         }
     }
 }
